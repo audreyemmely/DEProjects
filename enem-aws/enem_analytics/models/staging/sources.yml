@@ -1,0 +1,18 @@
+version: 2
+
+sources:
+  - name: bronze
+    database: awsdatacatalog
+    schema: enem_db
+    tables:
+      - name: enem
+        description: "Camada bronze unificada com microdados do ENEM 2023 e 2024"
+        columns:
+          - name: nu_inscricao
+            description: "ID único do participante (máscara - não identifica entre anos)"
+          - name: ano
+            description: "Ano de referência do ENEM"
+          - name: nu_nota_mt
+            description: "Nota de Matemática"
+          - name: nu_nota_redacao
+            description: "Nota da Redação"
