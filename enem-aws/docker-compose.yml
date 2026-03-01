@@ -1,0 +1,92 @@
+# ─── Bloco comum compartilhado por todos os serviços Airflow ──────────────────
+x-airflow-common: &airflow-common
+  build: .
+  entrypoint: /bin/bash
+  environment:
+    - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+    - AIRFLOW__CORE__LOAD_EXAMPLES=false
+    - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+    - AIRFLOW__CORE__FERNET_KEY=ZmDfcTF7_60GrrY167zsiPd67pEvs0aGOv2oasOM1Pg=
+    - AIRFLOW__WEBSERVER__SECRET_KEY=enem_pipeline_secret
+    # Credenciais AWS passadas do .env para dentro do container
+    - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+    - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+    - S3_BUCKET=${S3_BUCKET}
+  volumes:
+    - ./dags:/opt/airflow/dags
+    - ./logs:/opt/airflow/logs
+    - ./plugins:/opt/airflow/plugins
+    - ./enem_analytics:/opt/airflow/dbt/enem_analytics
+  depends_on:
+    postgres:
+      condition: service_healthy
+  user: "${AIRFLOW_UID:-50000}:0"
+
+services:
+
+  # ─── Banco de dados interno do Airflow ──────────────────────────────────────
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: always
+
+  # ─── Init: roda UMA vez para preparar o banco e criar o usuário admin ────────
+  airflow-init:
+    <<: *airflow-common
+    command:
+      - -c
+      - |
+        airflow db migrate
+        airflow users create \
+          --username admin \
+          --password admin \
+          --firstname Admin \
+          --lastname User \
+          --role Admin \
+          --email admin@example.com || echo "Usuário já existe, continuando..."
+        echo "✅ Init concluído com sucesso!"
+    restart: on-failure
+
+  # ─── Webserver: interface gráfica em localhost:8080 ──────────────────────────
+  airflow-webserver:
+    <<: *airflow-common
+    command:
+      - -c
+      - airflow webserver
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ─── Scheduler: responsável por disparar as DAGs ─────────────────────────────
+  airflow-scheduler:
+    <<: *airflow-common
+    command:
+      - -c
+      - airflow scheduler
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
