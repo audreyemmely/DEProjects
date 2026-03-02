@@ -375,7 +375,7 @@ inicio
 
 ## 🔑 Aprendizados Técnicos
 
-- **Schema evolution:** microdados do ENEM mudaram estrutura entre anos — sempre valide contra o dicionário oficial
+- **Schema evolution:** microdados do ENEM mudaram estrutura entre anos
 - **Conflito de dependências Python:** virtualenv isolado como solução para bibliotecas com requisitos incompatíveis
 - **Custo no Athena:** Parquet + particionamento por `ano` + seleção de colunas reduz custo em ~10x vs CSV
 - **DBT vs SQL puro:** normalização feita uma vez no staging evita repetição de lógica complexa em todas as queries downstream
