@@ -55,9 +55,9 @@ enem-pipeline/
 ├── scripts/
 │   └── extract_enem_to_s3.ipynb     # Ingestão dos dados para o S3
 ├── Dockerfile
+├── README.md
 ├── docker-compose.yml
-├── prints-AWS.pdf                # Documento com prints das telas dos serviços AWS funcionando 
-└── README.md
+└── prints-AWS.pdf                # Documento com prints das telas dos serviços AWS funcionando
 ```
 
 ---
