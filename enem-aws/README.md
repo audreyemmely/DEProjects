@@ -45,15 +45,15 @@ enem-pipeline/
 │   │       ├── mart_desigualdade.sql
 │   │       └── mart_mobilidade_educacional.sql
 │   └── dbt_project.yml
-├── scripts/
-│   └── extract_enem_to_s3.ipynb     # Ingestão dos dados para o S3
 ├── glue/
 │   └── glue_raw_to_bronze.py     # Job Glue ETL (Raw → Bronze)
 ├── queries/                      # Queries analíticas no Athena
 │   ├── athena_query1.sql        
 |   ├── athena_query2.sql 
 |   ├── athena_query3.sql 
-|   └── athena_query4.sql  
+|   └── athena_query4.sql
+├── scripts/
+│   └── extract_enem_to_s3.ipynb     # Ingestão dos dados para o S3
 ├── Dockerfile
 ├── docker-compose.yml
 ├── prints-AWS.pdf                # Documento com prints das telas dos serviços AWS funcionando 
